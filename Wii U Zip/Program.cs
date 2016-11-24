@@ -66,7 +66,6 @@ namespace Wii_U_Zip
         [STAThread]
         static void Main(string[] args)
         {
-            
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
            try

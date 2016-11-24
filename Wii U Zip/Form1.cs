@@ -50,6 +50,10 @@ namespace Wii_U_Zip
                     treeView1.Nodes.Add(new TreeNode("contents.bin") { Tag = szs });
                 }
             }
+            else if (Path.GetExtension(file).Equals(".pck"))
+            {
+                PCK p = new PCK(file);
+            }
             else
             {
                 SARC sarc = new SARC(file);
@@ -94,7 +98,8 @@ namespace Wii_U_Zip
                 ofd.CheckFileExists = true;
                 ofd.Filter = "All supported Filetypes (.szs, .sarc, .arc, .pack, .bars, .bgenv)|*.szs;*.sarc;*.arc;*.pack;*.bars;*.bgenv|" +
                              "YAZ0 compressed File (.szs)|*.szs|" +
-                             "SARC archive (.sarc, .arc, .pack, .bars, .bgenv)|*.sarc;*.arc;*.pack;*.bars;*.bgenv";
+                             "SARC archive (.sarc, .arc, .pack, .bars, .bgenv)|*.sarc;*.arc;*.pack;*.bars;*.bgenv|" +
+                             "All Files|*.*";
                 
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {

@@ -9,6 +9,15 @@ namespace Wii_U_Zip
 {
     class PCK
     {
+        public struct MineString
+        {
+            public string name;
+            public int unk1;
+            public int unk2;
+        }
+
+        public List<MineString> mineStrings = new List<MineString>();
+
         public PCK()
         {
 
@@ -26,14 +35,17 @@ namespace Wii_U_Zip
 
             int versionNumber = f.readInt();
             int nameCount = f.readInt();
-
+            f.skip(4);
+            
             for (int i = 0; i < nameCount; i++)
             {
+                MineString temp = new MineString();
                 int length = f.readInt() * 2;
-                string name = Encoding.Unicode.GetString(f.readBytes(length));
-                f.skip(4);
-                int unk1 = f.readInt();
-                int unk2 = f.readInt();
+                temp.name = Encoding.Unicode.GetString(f.readBytes(length));
+                //f.skip(4);
+                temp.unk1 = f.readInt();
+                temp.unk2 = f.readInt();
+                mineStrings.Add(temp);
             }
         }
 

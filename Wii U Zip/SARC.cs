@@ -115,17 +115,17 @@ namespace Wii_U_Zip
                 f.writeByte(1);
                 if(endian == Endianness.Big)
                 {
-                    f.writeByte((byte)((stringPos & 0xFF0000) >> 64));
-                    f.writeByte((byte)((stringPos & 0xFF00) >> 32));
+                    f.writeByte((byte)((stringPos & 0xFF0000) >> 16));
+                    f.writeByte((byte)((stringPos & 0xFF00) >> 8));
                     f.writeByte((byte)(stringPos & 0xFF));
                 }
                 else
                 {
                     f.writeByte((byte)(stringPos & 0xFF));
-                    f.writeByte((byte)((stringPos & 0xFF00) >> 32));
-                    f.writeByte((byte)((stringPos & 0xFF0000) >> 64));
+                    f.writeByte((byte)((stringPos & 0xFF00) >> 8));
+                    f.writeByte((byte)((stringPos & 0xFF0000) >> 16));
                 }
-                stringPos += GetSizeInChunks(filename.Length + 1, 4);
+                stringPos += GetSizeInChunks(filename.Length + 1, 4) / 4;
                 f.writeInt(dataPos);
                 f.writeInt(dataPos + files[filename].Length);
                 dataPos += files[filename].Length;
@@ -140,6 +140,9 @@ namespace Wii_U_Zip
                 while (f.pos() % 4 != 0)
                     f.writeByte(0);
             }
+
+            while ((f.pos() + 0x14) % 0x100 != 0)
+                f.writeByte(0);
 
             sfatStartOffset = f.pos();
 
