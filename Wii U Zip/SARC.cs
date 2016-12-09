@@ -11,6 +11,7 @@ namespace Wii_U_Zip
     {
         public Dictionary<string, byte[]> files = new Dictionary<string, byte[]>();
         public Endianness endian = Endianness.Big;
+        public int padding = -1;
 
         struct SFATNode
         {
@@ -38,9 +39,9 @@ namespace Wii_U_Zip
             f.Endian = Endianness.Big;
             f.seek(6); //SARC
             int endnss = f.readShort();
-            if (endnss == -257)
+            if (endnss == 0xFEFF)
                 f.Endian = Endianness.Big;
-            if (endnss == -2)
+            if (endnss == 0xFFFE)
                 f.Endian = Endianness.Little;
 
             endian = f.Endian;
@@ -57,8 +58,7 @@ namespace Wii_U_Zip
             {
                 SFATNode temp;
                 temp.nameHash = f.readInt();
-                f.skip(1);
-                temp.nameTableOffset = ((f.readByte() * 256) + f.readByte()) * 256 + f.readByte();
+                temp.nameTableOffset = f.readInt() - 0x1000000;
                 temp.fileDataOffset = f.readInt();
                 temp.endFileDataOffset = f.readInt();
                 sfatNodes.Add(temp);
@@ -112,19 +112,7 @@ namespace Wii_U_Zip
             foreach (string filename in files.Keys)
             {
                 f.writeInt((int)GetHash(filename.ToArray(), filename.Length, 0x65));
-                f.writeByte(1);
-                if(endian == Endianness.Big)
-                {
-                    f.writeByte((byte)((stringPos & 0xFF0000) >> 16));
-                    f.writeByte((byte)((stringPos & 0xFF00) >> 8));
-                    f.writeByte((byte)(stringPos & 0xFF));
-                }
-                else
-                {
-                    f.writeByte((byte)(stringPos & 0xFF));
-                    f.writeByte((byte)((stringPos & 0xFF00) >> 8));
-                    f.writeByte((byte)((stringPos & 0xFF0000) >> 16));
-                }
+                f.writeInt(stringPos + 0x1000000);
                 stringPos += GetSizeInChunks(filename.Length + 1, 4) / 4;
                 f.writeInt(dataPos);
                 f.writeInt(dataPos + files[filename].Length);
@@ -141,8 +129,11 @@ namespace Wii_U_Zip
                     f.writeByte(0);
             }
 
-            while ((f.pos() + 0x14) % 0x100 != 0)
-                f.writeByte(0);
+            if (padding == -1 || padding < f.pos())
+                while ((f.pos() + 0x14) % 0x100 != 0)
+                    f.writeByte(0);
+            else
+                f.writeBytes(new byte[padding - f.pos()]);
 
             sfatStartOffset = f.pos();
 
@@ -157,7 +148,7 @@ namespace Wii_U_Zip
         public byte[] Rebuild()
         {
             FileOutput f = new FileOutput();
-            f.Endian = Endianness.Big;
+            f.Endian = endian;
 
             f.writeString("SARC");
             f.writeShort(0x14);

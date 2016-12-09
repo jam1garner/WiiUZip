@@ -56,7 +56,7 @@ namespace Wii_U_Zip
             string[] types = { ".arc", ".sarc", ".szs", ".bars", ".bgenv" };
             foreach (string type in types)
             {
-                Associate(type, "WiiUZip", "Tool for extracting Wii U archives", "WiiUZip.ico", Application.ExecutablePath);
+                Associate(type, "WiiUZip", "Wii U Archive", "WiiUZip.ico", Application.ExecutablePath);
             }
         }
 

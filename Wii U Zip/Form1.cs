@@ -36,10 +36,12 @@ namespace Wii_U_Zip
             if (Path.GetExtension(file).Equals(".szs"))
             {
                 byte[] szs = YAZ0.Decompress(File.ReadAllBytes(file));
+                Console.WriteLine("YAZ0 decompressed");
                 if ((new FileData(szs)).readString(0, 4).Equals("SARC"))
                 {
                     SARC sarc = new SARC();
                     sarc.Read(szs);
+                    bigEndianToolStripMenuItem.Checked = (sarc.endian == Endianness.Big);
                     foreach (string name in sarc.files.Keys)
                     {
                         treeView1.Nodes.Add(new TreeNode(name) { Tag = sarc.files[name] });
@@ -50,13 +52,10 @@ namespace Wii_U_Zip
                     treeView1.Nodes.Add(new TreeNode("contents.bin") { Tag = szs });
                 }
             }
-            else if (Path.GetExtension(file).Equals(".pck"))
-            {
-                PCK p = new PCK(file);
-            }
             else
             {
                 SARC sarc = new SARC(file);
+                bigEndianToolStripMenuItem.Checked = (sarc.endian == Endianness.Big);
                 foreach (string name in sarc.files.Keys)
                 {
                     treeView1.Nodes.Add(new TreeNode(name) { Tag = sarc.files[name] });
@@ -130,6 +129,8 @@ namespace Wii_U_Zip
                 if(sfd.ShowDialog() == DialogResult.OK)
                 {
                     SARC sarc = new SARC();
+                    if (!bigEndianToolStripMenuItem.Checked)
+                        sarc.endian = Endianness.Little;
                     foreach (TreeNode t in treeView1.Nodes)
                     {
                         sarc.files.Add(t.Text, (byte[])t.Tag);
@@ -148,6 +149,8 @@ namespace Wii_U_Zip
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
                     SARC sarc = new SARC();
+                    if(!bigEndianToolStripMenuItem.Checked)
+                        sarc.endian = Endianness.Little;
                     foreach (TreeNode t in treeView1.Nodes)
                     {
                         sarc.files.Add(t.Text, (byte[])t.Tag);
@@ -228,6 +231,38 @@ namespace Wii_U_Zip
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (string file in files)
                 addFile(file);
+        }
+
+        private void paddedYAZ0SARCszsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Settings s = new Settings();
+            s.bigEndian = bigEndianToolStripMenuItem.Checked;
+            (new exportSettings(s)).ShowDialog();
+            if (!s.save)
+                return;
+            using (var sfd = new SaveFileDialog())
+            {
+                sfd.Filter = "All supported Filetypes (.szs, .sarc, .arc, .pack, .bars, .bgenv)|*.szs;*.sarc;*.arc;*.pack;*.bars;*.bgenv|" +
+                             "YAZ0 compressed File (.szs)|*.szs|" +
+                             "SARC archive (.sarc, .arc, .pack, .bars, .bgenv)|*.sarc;*.arc;*.pack;*.bars;*.bgenv|" +
+                             "All Files|*.*";
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    SARC sarc = new SARC();
+                    sarc.padding = s.offset;
+                    if (!s.bigEndian)
+                        sarc.endian = Endianness.Little;
+                    foreach (TreeNode t in treeView1.Nodes)
+                    {
+                        sarc.files.Add(t.Text, (byte[])t.Tag);
+                    }
+                    if (Path.GetExtension(sfd.FileName) == ".szs")
+                        File.WriteAllBytes(sfd.FileName, YAZ0.LazyCompress(sarc.Rebuild(), s.flags));
+                    else
+                        File.WriteAllBytes(sfd.FileName, sarc.Rebuild());
+                }
+            }
         }
     }
 }

@@ -38,8 +38,10 @@
             this.sARCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.yAZ0SARCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.yAZ0FileszsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.paddedYAZ0SARCszsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setupFiletypeAssociationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bigEndianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.button1 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
@@ -92,7 +94,8 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.saveToolStripMenuItem,
             this.openToolStripMenuItem,
-            this.setupFiletypeAssociationToolStripMenuItem});
+            this.setupFiletypeAssociationToolStripMenuItem,
+            this.bigEndianToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
@@ -102,7 +105,8 @@
             this.saveToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.sARCToolStripMenuItem,
             this.yAZ0SARCToolStripMenuItem,
-            this.yAZ0FileszsToolStripMenuItem});
+            this.yAZ0FileszsToolStripMenuItem,
+            this.paddedYAZ0SARCszsToolStripMenuItem});
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
             this.saveToolStripMenuItem.Text = "Save";
@@ -110,23 +114,30 @@
             // sARCToolStripMenuItem
             // 
             this.sARCToolStripMenuItem.Name = "sARCToolStripMenuItem";
-            this.sARCToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.sARCToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.sARCToolStripMenuItem.Text = "SARC";
             this.sARCToolStripMenuItem.Click += new System.EventHandler(this.sARCToolStripMenuItem_Click);
             // 
             // yAZ0SARCToolStripMenuItem
             // 
             this.yAZ0SARCToolStripMenuItem.Name = "yAZ0SARCToolStripMenuItem";
-            this.yAZ0SARCToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.yAZ0SARCToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.yAZ0SARCToolStripMenuItem.Text = "YAZ0 SARC (.szs)";
             this.yAZ0SARCToolStripMenuItem.Click += new System.EventHandler(this.yAZ0SARCToolStripMenuItem_Click);
             // 
             // yAZ0FileszsToolStripMenuItem
             // 
             this.yAZ0FileszsToolStripMenuItem.Name = "yAZ0FileszsToolStripMenuItem";
-            this.yAZ0FileszsToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.yAZ0FileszsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.yAZ0FileszsToolStripMenuItem.Text = "YAZ0 File (.szs)";
             this.yAZ0FileszsToolStripMenuItem.Click += new System.EventHandler(this.yAZ0FileszsToolStripMenuItem_Click);
+            // 
+            // paddedYAZ0SARCszsToolStripMenuItem
+            // 
+            this.paddedYAZ0SARCszsToolStripMenuItem.Name = "paddedYAZ0SARCszsToolStripMenuItem";
+            this.paddedYAZ0SARCszsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.paddedYAZ0SARCszsToolStripMenuItem.Text = "Custom YAZ0 SARC (.szs)";
+            this.paddedYAZ0SARCszsToolStripMenuItem.Click += new System.EventHandler(this.paddedYAZ0SARCszsToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem
             // 
@@ -141,6 +152,15 @@
             this.setupFiletypeAssociationToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
             this.setupFiletypeAssociationToolStripMenuItem.Text = "Setup Filetype Association";
             this.setupFiletypeAssociationToolStripMenuItem.Click += new System.EventHandler(this.setupFiletypeAssociationToolStripMenuItem_Click);
+            // 
+            // bigEndianToolStripMenuItem
+            // 
+            this.bigEndianToolStripMenuItem.Checked = true;
+            this.bigEndianToolStripMenuItem.CheckOnClick = true;
+            this.bigEndianToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.bigEndianToolStripMenuItem.Name = "bigEndianToolStripMenuItem";
+            this.bigEndianToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+            this.bigEndianToolStripMenuItem.Text = "Big Endian";
             // 
             // button1
             // 
@@ -218,6 +238,8 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.ToolStripMenuItem bigEndianToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem paddedYAZ0SARCszsToolStripMenuItem;
     }
 }
 

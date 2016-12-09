@@ -16,7 +16,9 @@ namespace Wii_U_Zip
             f.Endian = Endianness.Big;
             f.seek(4);
             int uncompressedSize = f.readInt();
-            f.seek(0x10);
+            byte[] flags = f.read(8);
+            //if ((flags[3] & 0x80) != 0)
+            //    f.Endian = Endianness.Little;
 
             byte[] src = f.read(data.Length - 0x10);
             byte[] dst = new byte[uncompressedSize];
@@ -95,6 +97,36 @@ namespace Wii_U_Zip
                 posInChunk = 0;
                 f.writeByte(0xFF);
                 while(pos + posInChunk < data.Length && posInChunk < 8)
+                {
+                    f.writeByte(data[pos + posInChunk]);
+                    posInChunk++;
+                }
+                pos += posInChunk;
+            }
+
+            return f.getBytes();
+        }
+
+        public static byte[] LazyCompress(byte[] data, int flags)
+        {
+            FileOutput f = new FileOutput();
+            f.Endian = Endianness.Little;
+            f.writeString("Yaz0");
+            byte w1 = (byte)(data.Length & 0xFF);
+            byte w2 = (byte)((data.Length >> 8) & 0xFF);
+            byte w3 = (byte)((data.Length >> 16) & 0xFF);
+            byte w4 = (byte)(data.Length >> 24);
+            f.writeInt((w1 << 24) | (w2 << 16) | (w3 << 8) | w4);
+            f.Endian = Endianness.Big;
+            f.writeInt(flags);
+            f.Endian = Endianness.Little;
+            f.writeHex("00000000");
+            int pos = 0, posInChunk = 0;
+            while (pos < data.Length)
+            {
+                posInChunk = 0;
+                f.writeByte(0xFF);
+                while (pos + posInChunk < data.Length && posInChunk < 8)
                 {
                     f.writeByte(data[pos + posInChunk]);
                     posInChunk++;
