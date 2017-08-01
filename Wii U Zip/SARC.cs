@@ -10,6 +10,7 @@ namespace Wii_U_Zip
     class SARC
     {
         public Dictionary<string, byte[]> files = new Dictionary<string, byte[]>();
+
         public Endianness endian = Endianness.Big;
         public int padding = -1;
 
@@ -19,6 +20,7 @@ namespace Wii_U_Zip
             public int nameTableOffset;
             public int fileDataOffset;
             public int endFileDataOffset;
+            public bool hasString;
         }
 
         public SARC()
@@ -48,7 +50,7 @@ namespace Wii_U_Zip
 
             int archiveSize = f.readInt();
             int startOffset = f.readInt();
-
+            padding = startOffset;
             f.skip(10);//SFAT
             int nodeCount = f.readShort();
             int hashMultiplier = f.readInt();
@@ -59,6 +61,10 @@ namespace Wii_U_Zip
                 SFATNode temp;
                 temp.nameHash = f.readInt();
                 temp.nameTableOffset = f.readInt() - 0x1000000;
+                if (temp.nameTableOffset == -0x1000000)
+                    temp.hasString = false;
+                else
+                    temp.hasString = true;
                 temp.fileDataOffset = f.readInt();
                 temp.endFileDataOffset = f.readInt();
                 sfatNodes.Add(temp);
@@ -69,8 +75,13 @@ namespace Wii_U_Zip
             int nameTableStart = f.pos();
             foreach (SFATNode sfat in sfatNodes)
             {
-                f.seek(sfat.nameTableOffset * 4 + nameTableStart);
-                string tempName = f.readString();
+                string tempName;
+                if (sfat.hasString) {
+                    f.seek(sfat.nameTableOffset * 4 + nameTableStart);
+                     tempName = f.readString();
+                }
+                else
+                     tempName = "0x" + sfat.nameHash.ToString("X8");
                 f.seek(sfat.fileDataOffset + startOffset);
                 byte[] tempFile = f.read(sfat.endFileDataOffset - sfat.fileDataOffset);
                 files.Add(tempName, tempFile);
@@ -109,18 +120,27 @@ namespace Wii_U_Zip
 
             int stringPos = 0;
             int dataPos = 0;
+            bool isString = true;
             foreach (string filename in files.Keys)
             {
+                if (filename.Contains("0x"))
+                {
+                    isString = false;
+                    f.writeInt((int)Convert.ToInt32(filename,16));
+                    f.writeInt(0);
+                }
+                else { 
                 f.writeInt((int)GetHash(filename.ToArray(), filename.Length, 0x65));
                 f.writeInt(stringPos + 0x1000000);
-                stringPos += GetSizeInChunks(filename.Length + 1, 4) / 4;
+                    stringPos += GetSizeInChunks(filename.Length + 1, 4) / 4;
+                }
                 f.writeInt(dataPos);
                 f.writeInt(dataPos + files[filename].Length);
-                dataPos += files[filename].Length;
+                dataPos += files[filename].Length % padding == 0 ? files[filename].Length : files[filename].Length + (padding - files[filename].Length % padding);
             }
 
             f.writeHex("53464E5400080000");
-
+            if (isString) { 
             foreach (string filename in files.Keys)
             {
                 f.writeString(filename);
@@ -128,18 +148,24 @@ namespace Wii_U_Zip
                 while (f.pos() % 4 != 0)
                     f.writeByte(0);
             }
-
+            }
             if (padding == -1 || padding < f.pos())
                 while ((f.pos() + 0x14) % 0x100 != 0)
                     f.writeByte(0);
             else
-                f.writeBytes(new byte[padding - f.pos()]);
+                f.writeBytes(new byte[padding - (f.pos() + 0x14)]);
 
             sfatStartOffset = f.pos();
-
+            int cur = 0;
             foreach (string filename in files.Keys)
             {
+                f.writeIntAt(f.pos() - sfatStartOffset , 0x14 + (cur*0x10));
                 f.writeBytes(files[filename]);
+                f.writeIntAt(f.pos() - sfatStartOffset, 0x18 + (cur * 0x10));
+                while ((f.pos() + 0x14) % padding != 0)
+                    f.writeByte(0);
+                
+                cur++;
             }
 
             return f.getBytes();
