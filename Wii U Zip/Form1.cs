@@ -14,6 +14,7 @@ namespace Wii_U_Zip
 {
     public partial class Form1 : Form
     {
+        public int globalPadding = -1;
         public Form1(string file)
         {
             InitializeComponent();
@@ -41,6 +42,7 @@ namespace Wii_U_Zip
                 {
                     SARC sarc = new SARC();
                     sarc.Read(szs);
+                    globalPadding = sarc.padding;
                     bigEndianToolStripMenuItem.Checked = (sarc.endian == Endianness.Big);
                     foreach (string name in sarc.files.Keys)
                     {
@@ -55,6 +57,7 @@ namespace Wii_U_Zip
             else
             {
                 SARC sarc = new SARC(file);
+                globalPadding = sarc.padding;
                 bigEndianToolStripMenuItem.Checked = (sarc.endian == Endianness.Big);
                 foreach (string name in sarc.files.Keys)
                 {
@@ -129,6 +132,7 @@ namespace Wii_U_Zip
                 if(sfd.ShowDialog() == DialogResult.OK)
                 {
                     SARC sarc = new SARC();
+                    sarc.padding = globalPadding;
                     if (!bigEndianToolStripMenuItem.Checked)
                         sarc.endian = Endianness.Little;
                     foreach (TreeNode t in treeView1.Nodes)
@@ -149,7 +153,8 @@ namespace Wii_U_Zip
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
                     SARC sarc = new SARC();
-                    if(!bigEndianToolStripMenuItem.Checked)
+                    sarc.padding = globalPadding;
+                    if (!bigEndianToolStripMenuItem.Checked)
                         sarc.endian = Endianness.Little;
                     foreach (TreeNode t in treeView1.Nodes)
                     {
